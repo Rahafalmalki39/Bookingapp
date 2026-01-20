@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}All Events - BookIt{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1 style="color: #667eea; margin-bottom: 1rem;">All Events</h1>
+    <p style="color: #666; font-size: 1.1rem;">Browse and book tickets for amazing events</p>
+</div>
+
+{% if events %}
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
+        {% for event in events %}
+        <div class="card" style="padding: 1.5rem; transition: transform 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                <h3 style="margin-bottom: 0.5rem;">{{ event.name }}</h3>
+                <span style="background: rgba(255,255,255,0.3); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.9rem;">
+                    {{ event.category }}
+                </span>
+            </div>
+            
+            <p style="color: #333; margin-bottom: 0.75rem; line-height: 1.6;">
+                {{ event.description[:100] }}{% if event.description|length > 100 %}...{% endif %}
+            </p>
+            
+            <div style="margin-bottom: 1rem;">
+                <p style="color: #666; margin-bottom: 0.5rem;">
+                    <strong>📅 Date:</strong> {{ event.date }}
+                </p>
+                <p style="color: #666; margin-bottom: 0.5rem;">
+                    <strong>🕒 Time:</strong> {{ event.time }}
+                </p>
+                <p style="color: #666; margin-bottom: 0.5rem;">
+                    <strong>📍 Venue:</strong> {{ event.venue }}
+                </p>
+                <p style="color: #667eea; font-size: 1.3rem; font-weight: bold; margin-bottom: 0.5rem;">
+                    ${{ event.price }}
+                </p>
+                <p style="color: {% if event.available_seats < 10 %}#dc3545{% else %}#28a745{% endif %}; font-weight: 500;">
+                    {% if event.available_seats > 0 %}
+                        {{ event.available_seats }} seats available
+                    {% else %}
+                        Sold Out
+                    {% endif %}
+                </p>
+            </div>
+            
+            <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn" style="width: 100%; text-align: center; display: block;">
+                View Details & Book
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="card" style="text-align: center; padding: 3rem;">
+        <h2 style="color: #666; margin-bottom: 1rem;">No Events Available</h2>
+        <p style="color: #999; font-size: 1.1rem;">Check back soon for exciting events!</p>
+    </div>
+{% endif %}
+{% endblock %}

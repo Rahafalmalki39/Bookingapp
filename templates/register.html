@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Register - BookIt{% endblock %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 3rem auto;">
+    <div class="card">
+        <h1 style="color: #667eea; margin-bottom: 1.5rem; text-align: center;">Create Your Account</h1>
+        
+        <form method="POST" action="{{ url_for('register') }}">
+            <div style="margin-bottom: 1.5rem;">
+                <label for="name" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Full Name</label>
+                <input 
+                    type="text" 
+                    id="name" 
+                    name="name" 
+                    required 
+                    style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;"
+                    placeholder="John Doe"
+                >
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label for="email" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Email Address</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    required 
+                    style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;"
+                    placeholder="your.email@example.com"
+                >
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label for="password" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Password</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    required 
+                    minlength="6"
+                    style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;"
+                    placeholder="At least 6 characters"
+                >
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label for="role" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Account Type</label>
+                <select 
+                    id="role" 
+                    name="role" 
+                    required 
+                    style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;"
+                >
+                    <option value="customer">Customer (Book Events)</option>
+                    <option value="admin">Admin (Manage Events)</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn" style="width: 100%; padding: 1rem; font-size: 1.1rem;">
+                Create Account
+            </button>
+        </form>
+        
+        <div style="text-align: center; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #ddd;">
+            <p style="color: #666;">
+                Already have an account? 
+                <a href="{{ url_for('login') }}" style="color: #667eea; font-weight: 500; text-decoration: none;">
+                    Login here
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
