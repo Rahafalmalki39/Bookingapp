@@ -6,6 +6,11 @@ import bcrypt
 import os
 from datetime import datetime, timedelta
 import secrets
+import google.generativeai as genai
+from config import GEMINI_API_KEY
+
+# Configure Gemini AI
+genai.configure(api_key=GEMINI_API_KEY)
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -321,6 +326,200 @@ def create_event():
         return redirect(url_for('admin_dashboard'))
     
     return render_template('create_event.html')
+# ============================================
+# REST API Endpoints (JSON responses)
+# ============================================
 
+@app.route('/api/events', methods=['GET'])
+def api_get_events():
+    """REST API: Get all events as JSON"""
+    events_ref = db.collection(EVENTS_COLLECTION)
+    events_list = []
+    
+    for doc in events_ref.stream():
+        event_data = doc.to_dict()
+        event_data['id'] = doc.id
+        # Convert datetime to string for JSON serialization
+        if 'created_at' in event_data:
+            event_data['created_at'] = event_data['created_at'].isoformat()
+        events_list.append(event_data)
+    
+    return jsonify({
+        'success': True,
+        'count': len(events_list),
+        'events': events_list
+    })
+
+@app.route('/api/events/<event_id>', methods=['GET'])
+def api_get_event(event_id):
+    """REST API: Get single event by ID"""
+    event_ref = db.collection(EVENTS_COLLECTION).document(event_id)
+    event_doc = event_ref.get()
+    
+    if not event_doc.exists:
+        return jsonify({
+            'success': False,
+            'error': 'Event not found'
+        }), 404
+    
+    event_data = event_doc.to_dict()
+    event_data['id'] = event_doc.id
+    if 'created_at' in event_data:
+        event_data['created_at'] = event_data['created_at'].isoformat()
+    
+    return jsonify({
+        'success': True,
+        'event': event_data
+    })
+
+@app.route('/api/bookings', methods=['GET'])
+def api_get_bookings():
+    """REST API: Get all bookings from Cloud SQL"""
+    select_all = sqlalchemy.text("""
+        SELECT b.id, b.user_id, b.event_id, b.event_name, b.tickets, 
+               b.total_price, b.booking_date, b.status,
+               t.amount as transaction_amount, t.payment_method
+        FROM bookings b
+        LEFT JOIN transactions t ON b.id = t.booking_id
+        ORDER BY b.booking_date DESC
+    """)
+    
+    bookings_list = []
+    with db_pool.connect() as conn:
+        result = conn.execute(select_all)
+        for row in result:
+            bookings_list.append({
+                'id': row[0],
+                'user_id': row[1],
+                'event_id': row[2],
+                'event_name': row[3],
+                'tickets': row[4],
+                'total_price': float(row[5]),
+                'booking_date': row[6].isoformat() if row[6] else None,
+                'status': row[7],
+                'transaction_amount': float(row[8]) if row[8] else None,
+                'payment_method': row[9]
+            })
+    
+    return jsonify({
+        'success': True,
+        'count': len(bookings_list),
+        'bookings': bookings_list
+    })
+
+@app.route('/api/stats', methods=['GET'])
+def api_get_stats():
+    """REST API: Get platform statistics"""
+    # Events from Firestore
+    events_count = len(list(db.collection(EVENTS_COLLECTION).stream()))
+    users_count = len(list(db.collection(USERS_COLLECTION).stream()))
+    
+    # Bookings stats from Cloud SQL
+    stats_query = sqlalchemy.text("""
+        SELECT 
+            COUNT(*) as total_bookings,
+            SUM(total_price) as total_revenue,
+            SUM(tickets) as total_tickets_sold
+        FROM bookings
+        WHERE status = 'confirmed'
+    """)
+    
+    with db_pool.connect() as conn:
+        result = conn.execute(stats_query)
+        row = result.fetchone()
+        bookings_count = row[0] if row[0] else 0
+        total_revenue = float(row[1]) if row[1] else 0.0
+        total_tickets = row[2] if row[2] else 0
+    
+    return jsonify({
+        'success': True,
+        'statistics': {
+            'total_events': events_count,
+            'total_users': users_count,
+            'total_bookings': bookings_count,
+            'total_revenue': total_revenue,
+            'total_tickets_sold': total_tickets
+        }
+    })
+# ============================================
+# AI Chatbot Endpoints
+# ============================================
+
+@app.route('/chat')
+def chat_page():
+    """Chatbot page"""
+    return render_template('chat.html')
+@app.route('/api/chat', methods=['POST'])
+def api_chat():
+    """Rule-based Chatbot for BookIt"""
+    user_message = request.json.get('message', '').lower()
+    
+    if not user_message:
+        return jsonify({
+            'success': False,
+            'error': 'No message provided'
+        }), 400
+    
+    # Rule-based responses
+    response_text = ""
+    
+    if any(word in user_message for word in ['hello', 'hi', 'hey', 'greetings']):
+        response_text = "Hello! Welcome to BookIt! I'm here to help you with event bookings. What would you like to know?"
+    
+    elif any(word in user_message for word in ['book', 'booking', 'reserve', 'ticket']):
+        response_text = """To book an event:
+1. Browse events on our Events page
+2. Click on an event you're interested in
+3. Select the number of tickets you want
+4. Click 'Book Now' to confirm your booking
+
+You must be logged in to make a booking. If you don't have an account, please register first!"""
+    
+    elif any(word in user_message for word in ['payment', 'pay', 'price', 'cost']):
+        response_text = "Our payment system is secure and encrypted. Event prices vary depending on the event. You can see the price per ticket on each event's detail page. The total cost will be calculated based on the number of tickets you select."
+    
+    elif any(word in user_message for word in ['cancel', 'refund', 'change']):
+        response_text = "To view or manage your bookings, go to 'My Bookings' in the navigation menu. For cancellations or changes, please contact our support team with your booking ID."
+    
+    elif any(word in user_message for word in ['register', 'sign up', 'account', 'create account']):
+        response_text = "To create an account, click 'Register' in the top menu. You can register as a Customer (to book events) or as an Admin (to create and manage events). Registration is quick and free!"
+    
+    elif any(word in user_message for word in ['event', 'concert', 'conference', 'workshop', 'what events']):
+        response_text = "We have various types of events including concerts, conferences, workshops, sports events, theatre shows, and more! Visit our Events page to browse all available events. You can filter by category to find what interests you."
+    
+    elif any(word in user_message for word in ['how', 'help', 'support']):
+        response_text = """I can help you with:
+- Booking events and buying tickets
+- Creating an account
+- Understanding our payment process
+- Finding events
+- Managing your bookings
+
+What would you like help with?"""
+    
+    elif any(word in user_message for word in ['admin', 'create event', 'manage']):
+        response_text = "If you're an admin, you can create and manage events from the Admin Dashboard. To access it, register with an Admin account and log in. From there, you can create events, view statistics, and manage the platform."
+    
+    elif any(word in user_message for word in ['thank', 'thanks', 'appreciate']):
+        response_text = "You're welcome! Happy to help. If you have any other questions about BookIt, feel free to ask!"
+    
+    elif any(word in user_message for word in ['bye', 'goodbye', 'see you']):
+        response_text = "Goodbye! Have a great time at your events! Come back anytime you need help with BookIt."
+    
+    else:
+        response_text = """I'm here to help with BookIt! I can assist you with:
+- Booking events
+- Account registration
+- Payment information
+- Event browsing
+- Managing bookings
+
+What would you like to know more about?"""
+    
+    return jsonify({
+        'success': True,
+        'message': response_text
+    })
+        
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True)

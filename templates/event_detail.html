@@ -3,113 +3,130 @@
 {% block title %}{{ event.name }} - BookIt{% endblock %}
 
 {% block content %}
-<div class="card" style="max-width: 800px; margin: 0 auto;">
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; border-radius: 12px; margin-bottom: 2rem;">
-        <h1 style="margin-bottom: 0.5rem;">{{ event.name }}</h1>
-        <span style="background: rgba(255,255,255,0.3); padding: 0.5rem 1rem; border-radius: 20px; font-size: 1rem; display: inline-block;">
-            {{ event.category }}
-        </span>
-    </div>
+<div class="card" style="max-width: 900px; margin: 0 auto; padding: 0; overflow: hidden;">
     
-    <div style="margin-bottom: 2rem;">
-        <h2 style="color: #667eea; margin-bottom: 1rem;">Event Details</h2>
-        <p style="color: #333; line-height: 1.8; font-size: 1.1rem; margin-bottom: 1.5rem;">
-            {{ event.description }}
-        </p>
-        
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-            <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px;">
-                <p style="color: #666; margin-bottom: 0.5rem;">📅 Date</p>
-                <p style="font-weight: bold; color: #333; font-size: 1.1rem;">{{ event.date }}</p>
-            </div>
-            
-            <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px;">
-                <p style="color: #666; margin-bottom: 0.5rem;">🕒 Time</p>
-                <p style="font-weight: bold; color: #333; font-size: 1.1rem;">{{ event.time }}</p>
-            </div>
-            
-            <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px;">
-                <p style="color: #666; margin-bottom: 0.5rem;">📍 Venue</p>
-                <p style="font-weight: bold; color: #333; font-size: 1.1rem;">{{ event.venue }}</p>
-            </div>
-            
-            <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px;">
-                <p style="color: #666; margin-bottom: 0.5rem;">💵 Price per Ticket</p>
-                <p style="font-weight: bold; color: #667eea; font-size: 1.3rem;">${{ event.price }}</p>
-            </div>
-        </div>
-        
-        <div style="background: {% if event.available_seats < 10 %}#fff3cd{% else %}#d4edda{% endif %}; padding: 1.5rem; border-radius: 8px; border-left: 4px solid {% if event.available_seats < 10 %}#ffc107{% else %}#28a745{% endif %};">
-            <p style="font-size: 1.2rem; font-weight: bold; color: #333; margin-bottom: 0.5rem;">
-                Seat Availability
-            </p>
-            <p style="font-size: 1.1rem; color: #666;">
-                <strong>{{ event.available_seats }}</strong> out of <strong>{{ event.total_seats }}</strong> seats available
-            </p>
-            {% if event.available_seats < 10 and event.available_seats > 0 %}
-                <p style="color: #856404; margin-top: 0.5rem; font-weight: 500;">⚠️ Only a few seats left!</p>
-            {% endif %}
-        </div>
-    </div>
-    
-    {% if event.available_seats > 0 %}
-        {% if session.get('user_id') %}
-            <div style="background: #f8f9fa; padding: 2rem; border-radius: 12px;">
-                <h2 style="color: #667eea; margin-bottom: 1.5rem;">Book Your Tickets</h2>
-                <form method="POST" action="{{ url_for('book_event', event_id=event.id) }}">
-                    <div style="margin-bottom: 1.5rem;">
-                        <label for="tickets" style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 1.1rem;">
-                            Number of Tickets
-                        </label>
-                        <input 
-                            type="number" 
-                            id="tickets" 
-                            name="tickets" 
-                            min="1" 
-                            max="{{ event.available_seats }}" 
-                            value="1" 
-                            required 
-                            style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1.1rem;"
-                            oninput="updateTotal()"
-                        >
-                    </div>
-                    
-                    <div style="background: white; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; border: 2px solid #667eea;">
-                        <p style="color: #666; margin-bottom: 0.5rem; font-size: 1rem;">Total Amount</p>
-                        <p id="total-price" style="font-size: 2rem; font-weight: bold; color: #667eea;">
-                            ${{ event.price }}
-                        </p>
-                    </div>
-                    
-                    <button type="submit" class="btn" style="width: 100%; padding: 1.25rem; font-size: 1.2rem;">
-                        🎫 Book Now
-                    </button>
-                </form>
-            </div>
-            
-            <script>
-                function updateTotal() {
-                    const tickets = document.getElementById('tickets').value;
-                    const price = {{ event.price }};
-                    const total = tickets * price;
-                    document.getElementById('total-price').textContent = '$' + total.toFixed(2);
-                }
-            </script>
+    <!-- Event Image Header -->
+    <div style="width: 100%; height: 400px; overflow: hidden; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); position: relative;">
+        {% if event.image_url %}
+            <img src="{{ event.image_url }}" alt="{{ event.name }}" 
+                 style="width: 100%; height: 100%; object-fit: cover;">
         {% else %}
-            <div style="background: #fff3cd; padding: 2rem; border-radius: 12px; text-align: center; border: 2px solid #ffc107;">
-                <p style="font-size: 1.2rem; color: #856404; margin-bottom: 1rem;">
-                    Please login to book tickets
-                </p>
-                <a href="{{ url_for('login') }}" class="btn" style="margin-right: 1rem;">Login</a>
-                <a href="{{ url_for('register') }}" class="btn btn-secondary">Register</a>
+            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 8rem;">
+                🎉
             </div>
         {% endif %}
-    {% else %}
-        <div style="background: #f8d7da; padding: 2rem; border-radius: 12px; text-align: center; border: 2px solid #dc3545;">
-            <h2 style="color: #721c24; margin-bottom: 0.5rem;">Sold Out</h2>
-            <p style="color: #721c24; font-size: 1.1rem;">This event is fully booked. Check out other events!</p>
-            <a href="{{ url_for('events') }}" class="btn" style="margin-top: 1rem;">Browse Other Events</a>
+        
+        <!-- Overlay with event name -->
+        <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); padding: 2rem; color: white;">
+            <h1 style="margin-bottom: 0.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">{{ event.name }}</h1>
+            <span style="background: rgba(102,126,234,0.9); padding: 0.5rem 1rem; border-radius: 20px; font-size: 1rem; display: inline-block;">
+                {{ event.category }}
+            </span>
         </div>
-    {% endif %}
+    </div>
+    
+    <!-- Event Details Content -->
+    <div style="padding: 2rem;">
+        <div style="margin-bottom: 2rem;">
+            <h2 style="color: #667eea; margin-bottom: 1rem;">Event Details</h2>
+            <p style="color: #333; line-height: 1.8; font-size: 1.1rem; margin-bottom: 1.5rem;">
+                {{ event.description }}
+            </p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px;">
+                    <p style="color: #666; margin-bottom: 0.5rem;">📅 Date</p>
+                    <p style="font-weight: bold; color: #333; font-size: 1.1rem;">{{ event.date }}</p>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px;">
+                    <p style="color: #666; margin-bottom: 0.5rem;">🕒 Time</p>
+                    <p style="font-weight: bold; color: #333; font-size: 1.1rem;">{{ event.time }}</p>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px;">
+                    <p style="color: #666; margin-bottom: 0.5rem;">📍 Venue</p>
+                    <p style="font-weight: bold; color: #333; font-size: 1.1rem;">{{ event.venue }}</p>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px;">
+                    <p style="color: #666; margin-bottom: 0.5rem;">💵 Price per Ticket</p>
+                    <p style="font-weight: bold; color: #667eea; font-size: 1.3rem;">${{ event.price }}</p>
+                </div>
+            </div>
+            
+            <div style="background: {% if event.available_seats < 10 %}#fff3cd{% else %}#d4edda{% endif %}; padding: 1.5rem; border-radius: 8px; border-left: 4px solid {% if event.available_seats < 10 %}#ffc107{% else %}#28a745{% endif %};">
+                <p style="font-size: 1.2rem; font-weight: bold; color: #333; margin-bottom: 0.5rem;">
+                    Seat Availability
+                </p>
+                <p style="font-size: 1.1rem; color: #666;">
+                    <strong>{{ event.available_seats }}</strong> out of <strong>{{ event.total_seats }}</strong> seats available
+                </p>
+                {% if event.available_seats < 10 and event.available_seats > 0 %}
+                    <p style="color: #856404; margin-top: 0.5rem; font-weight: 500;">⚠️ Only a few seats left!</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if event.available_seats > 0 %}
+            {% if session.get('user_id') %}
+                <div style="background: #f8f9fa; padding: 2rem; border-radius: 12px;">
+                    <h2 style="color: #667eea; margin-bottom: 1.5rem;">Book Your Tickets</h2>
+                    <form method="POST" action="{{ url_for('book_event', event_id=event.id) }}">
+                        <div style="margin-bottom: 1.5rem;">
+                            <label for="tickets" style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 1.1rem;">
+                                Number of Tickets
+                            </label>
+                            <input 
+                                type="number" 
+                                id="tickets" 
+                                name="tickets" 
+                                min="1" 
+                                max="{{ event.available_seats }}" 
+                                value="1" 
+                                required 
+                                style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1.1rem;"
+                                oninput="updateTotal()"
+                            >
+                        </div>
+                        
+                        <div style="background: white; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; border: 2px solid #667eea;">
+                            <p style="color: #666; margin-bottom: 0.5rem; font-size: 1rem;">Total Amount</p>
+                            <p id="total-price" style="font-size: 2rem; font-weight: bold; color: #667eea;">
+                                ${{ event.price }}
+                            </p>
+                        </div>
+                        
+                        <button type="submit" class="btn" style="width: 100%; padding: 1.25rem; font-size: 1.2rem;">
+                            🎫 Book Now
+                        </button>
+                    </form>
+                </div>
+                
+                <script>
+                    function updateTotal() {
+                        const tickets = document.getElementById('tickets').value;
+                        const price = {{ event.price }};
+                        const total = tickets * price;
+                        document.getElementById('total-price').textContent = '$' + total.toFixed(2);
+                    }
+                </script>
+            {% else %}
+                <div style="background: #fff3cd; padding: 2rem; border-radius: 12px; text-align: center; border: 2px solid #ffc107;">
+                    <p style="font-size: 1.2rem; color: #856404; margin-bottom: 1rem;">
+                        Please login to book tickets
+                    </p>
+                    <a href="{{ url_for('login') }}" class="btn" style="margin-right: 1rem;">Login</a>
+                    <a href="{{ url_for('register') }}" class="btn btn-secondary">Register</a>
+                </div>
+            {% endif %}
+        {% else %}
+            <div style="background: #f8d7da; padding: 2rem; border-radius: 12px; text-align: center; border: 2px solid #dc3545;">
+                <h2 style="color: #721c24; margin-bottom: 0.5rem;">Sold Out</h2>
+                <p style="color: #721c24; font-size: 1.1rem;">This event is fully booked. Check out other events!</p>
+                <a href="{{ url_for('events') }}" class="btn" style="margin-top: 1rem;">Browse Other Events</a>
+            </div>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}

@@ -11,3 +11,6 @@ FIRESTORE_DATABASE = 'bookit-db'
 
 # Flask Configuration
 SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
+
+# Google Gemini AI Configuration
+GEMINI_API_KEY = 'AIzaSyBiYB5Qh6p2-DWCXf4LMwUALvF3zf7iwcs'

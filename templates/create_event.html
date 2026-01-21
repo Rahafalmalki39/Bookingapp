@@ -32,6 +32,21 @@
                 ></textarea>
             </div>
             
+            <div style="margin-bottom: 1.5rem;">
+                <label for="image_url" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Event Image URL</label>
+                <input 
+                    type="url" 
+                    id="image_url" 
+                    name="image_url" 
+                    style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;"
+                    placeholder="https://example.com/event-image.jpg"
+                >
+                <small style="color: #666; display: block; margin-top: 0.5rem;">
+                    💡 Tip: Find free images at <a href="https://unsplash.com" target="_blank" style="color: #667eea;">Unsplash</a> or 
+                    <a href="https://pexels.com" target="_blank" style="color: #667eea;">Pexels</a>. Right-click image → Copy image address
+                </small>
+            </div>
+            
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
                 <div>
                     <label for="date" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Date *</label>
@@ -120,7 +135,7 @@
             
             <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
                 <p style="color: #666; font-size: 0.95rem; line-height: 1.6;">
-                    <strong>Note:</strong> All fields marked with * are required. Make sure to provide accurate information as this will be visible to customers.
+                    <strong>Note:</strong> All fields marked with * are required. Image URL is optional - if not provided, a default placeholder will be used.
                 </p>
             </div>
             

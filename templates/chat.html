@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}AI Assistant - BookIt{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <div class="card">
+        <h1 style="color: #667eea; margin-bottom: 0.5rem;">🤖 AI Customer Support</h1>
+        <p style="color: #666; margin-bottom: 1.5rem;">Ask me anything about BookIt events and bookings!</p>
+        
+        <!-- Chat Messages Container -->
+        <div id="chat-messages" style="height: 400px; overflow-y: auto; border: 2px solid #e0e0e0; border-radius: 12px; padding: 1.5rem; background: #f8f9fa; margin-bottom: 1.5rem;">
+            <div class="message bot-message" style="margin-bottom: 1rem; padding: 1rem; background: white; border-radius: 8px; border-left: 4px solid #667eea;">
+                <strong style="color: #667eea;">AI Assistant:</strong>
+                <p style="margin: 0.5rem 0 0 0; color: #333;">
+                    Hello! I'm your BookIt AI assistant. I can help you with:
+                    <br>• Finding and booking events
+                    <br>• Understanding how BookIt works
+                    <br>• Answering questions about your bookings
+                    <br><br>How can I help you today?
+                </p>
+            </div>
+        </div>
+        
+        <!-- Chat Input Form -->
+        <form id="chat-form" style="display: flex; gap: 1rem;">
+            <input 
+                type="text" 
+                id="user-message" 
+                placeholder="Type your message here..." 
+                required
+                style="flex: 1; padding: 1rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;"
+            >
+            <button type="submit" class="btn" style="padding: 1rem 2rem; white-space: nowrap;">
+                Send 📤
+            </button>
+        </form>
+        
+        <div id="loading" style="display: none; margin-top: 1rem; text-align: center; color: #667eea;">
+            <p>🤔 Thinking...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const chatMessages = document.getElementById('chat-messages');
+    const chatForm = document.getElementById('chat-form');
+    const userMessageInput = document.getElementById('user-message');
+    const loadingIndicator = document.getElementById('loading');
+
+    // Auto-scroll to bottom of chat
+    function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Add message to chat
+    function addMessage(message, isBot = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = isBot ? 'bot-message' : 'user-message';
+        messageDiv.style.cssText = `
+            margin-bottom: 1rem; 
+            padding: 1rem; 
+            background: ${isBot ? 'white' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}; 
+            border-radius: 8px; 
+            border-left: 4px solid ${isBot ? '#667eea' : '#764ba2'};
+            color: ${isBot ? '#333' : 'white'};
+        `;
+        
+        messageDiv.innerHTML = `
+            <strong style="color: ${isBot ? '#667eea' : 'white'};">${isBot ? 'AI Assistant' : 'You'}:</strong>
+            <p style="margin: 0.5rem 0 0 0; line-height: 1.6;">${message}</p>
+        `;
+        
+        chatMessages.appendChild(messageDiv);
+        scrollToBottom();
+    }
+
+    // Handle form submission
+    chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const message = userMessageInput.value.trim();
+        if (!message) return;
+        
+        // Add user message to chat
+        addMessage(message, false);
+        userMessageInput.value = '';
+        
+        // Show loading indicator
+        loadingIndicator.style.display = 'block';
+        
+        try {
+            // Send message to API
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: message })
+            });
+            
+            const data = await response.json();
+            
+            // Hide loading indicator
+            loadingIndicator.style.display = 'none';
+            
+            if (data.success) {
+                // Add bot response to chat
+                addMessage(data.message, true);
+            } else {
+                addMessage('Sorry, I encountered an error. Please try again.', true);
+            }
+        } catch (error) {
+            loadingIndicator.style.display = 'none';
+            addMessage('Sorry, I am having trouble connecting. Please try again later.', true);
+            console.error('Chat error:', error);
+        }
+    });
+</script>
+{% endblock %}

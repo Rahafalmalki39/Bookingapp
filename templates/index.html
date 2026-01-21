@@ -1,167 +1,97 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}BookIt - Event Booking System{% endblock %}</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-        }
-        
-        .navbar {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 1rem 2rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .navbar-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .logo {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #667eea;
-            text-decoration: none;
-        }
-        
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            list-style: none;
-        }
-        
-        .nav-links a {
-            text-decoration: none;
-            color: #333;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-        
-        .nav-links a:hover {
-            color: #667eea;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-        }
-        
-        .flash-messages {
-            margin-bottom: 1rem;
-        }
-        
-        .flash {
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-        }
-        
-        .flash.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .flash.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .btn {
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
-            background: #667eea;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: background 0.3s;
-        }
-        
-        .btn:hover {
-            background: #5568d3;
-        }
-        
-        .btn-secondary {
-            background: #6c757d;
-        }
-        
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-        
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-        }
-        
-        footer {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 2rem;
-            text-align: center;
-            margin-top: 4rem;
-        }
-    </style>
-</head>
-<body>
-    <nav class="navbar">
-        <div class="navbar-content">
-            <a href="{{ url_for('index') }}" class="logo">📅 BookIt</a>
-            <ul class="nav-links">
-                <li><a href="{{ url_for('index') }}">Home</a></li>
-                <li><a href="{{ url_for('events') }}">Events</a></li>
-                {% if session.get('user_id') %}
-                    <li><a href="{{ url_for('my_bookings') }}">My Bookings</a></li>
-                    {% if session.get('user_role') == 'admin' %}
-                        <li><a href="{{ url_for('admin_dashboard') }}">Admin</a></li>
-                    {% endif %}
-                    <li><a href="{{ url_for('logout') }}">Logout ({{ session.get('user_email') }})</a></li>
+{% extends "base.html" %}
+
+{% block title %}Home - BookIt{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1 style="color: #667eea; margin-bottom: 1rem;">Welcome to BookIt Event Booking System</h1>
+    
+    {% if user %}
+        <p style="font-size: 1.1rem; margin-bottom: 2rem;">
+            Hello, <strong>{{ user.name }}</strong>! Browse our exciting events below.
+        </p>
+    {% else %}
+        <p style="font-size: 1.1rem; margin-bottom: 2rem;">
+            Discover and book amazing events. <a href="{{ url_for('register') }}" style="color: #667eea;">Register now</a> to get started!
+        </p>
+    {% endif %}
+</div>
+
+<h2 style="color: white; margin-bottom: 1.5rem;">Upcoming Events</h2>
+
+{% if events %}
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
+        {% for event in events %}
+        <div class="card" style="padding: 0; overflow: hidden;">
+            <!-- Event Image -->
+            <div style="width: 100%; height: 200px; overflow: hidden; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                {% if event.image_url %}
+                    <img src="{{ event.image_url }}" alt="{{ event.name }}" 
+                         style="width: 100%; height: 100%; object-fit: cover;">
                 {% else %}
-                    <li><a href="{{ url_for('login') }}">Login</a></li>
-                    <li><a href="{{ url_for('register') }}">Register</a></li>
+                    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 4rem;">
+                        🎉
+                    </div>
                 {% endif %}
-            </ul>
+            </div>
+            
+            <!-- Event Details -->
+            <div style="padding: 1.5rem;">
+                <h3 style="color: #667eea; margin-bottom: 0.5rem;">{{ event.name }}</h3>
+                <p style="color: #666; margin-bottom: 0.5rem;">
+                    <strong>Category:</strong> {{ event.category }}
+                </p>
+                <p style="color: #666; margin-bottom: 0.5rem;">
+                    <strong>Date:</strong> {{ event.date }} at {{ event.time }}
+                </p>
+                <p style="color: #666; margin-bottom: 0.5rem;">
+                    <strong>Venue:</strong> {{ event.venue }}
+                </p>
+                <p style="color: #666; margin-bottom: 0.5rem;">
+                    <strong>Price:</strong> ${{ event.price }}
+                </p>
+                <p style="color: #666; margin-bottom: 1rem;">
+                    <strong>Available Seats:</strong> {{ event.available_seats }} / {{ event.total_seats }}
+                </p>
+                <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn" style="width: 100%; text-align: center;">
+                    View Details
+                </a>
+            </div>
         </div>
-    </nav>
-
-    <div class="container">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="flash-messages">
-                    {% for category, message in messages %}
-                        <div class="flash {{ category }}">{{ message }}</div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
-
-        {% block content %}{% endblock %}
+        {% endfor %}
     </div>
+{% else %}
+    <div class="card">
+        <p style="text-align: center; font-size: 1.1rem; color: #666;">
+            No events available at the moment. Check back soon!
+        </p>
+        {% if session.get('user_role') == 'admin' %}
+            <p style="text-align: center; margin-top: 1rem;">
+                <a href="{{ url_for('create_event') }}" class="btn">Create First Event</a>
+            </p>
+        {% endif %}
+    </div>
+{% endif %}
 
-    <footer>
-        <p>&copy; 2025 BookIt - Event Booking System | Cloud Computing Coursework</p>
-    </footer>
-</body>
-</html>
+<div class="card" style="margin-top: 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+    <h2 style="margin-bottom: 1rem;">Why Choose BookIt?</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+        <div>
+            <h3 style="margin-bottom: 0.5rem;">🎫 Easy Booking</h3>
+            <p>Book your tickets in just a few clicks</p>
+        </div>
+        <div>
+            <h3 style="margin-bottom: 0.5rem;">🔒 Secure Payments</h3>
+            <p>Your transactions are safe and encrypted</p>
+        </div>
+        <div>
+            <h3 style="margin-bottom: 0.5rem;">📱 Digital Tickets</h3>
+            <p>Access your tickets anytime, anywhere</p>
+        </div>
+        <div>
+            <h3 style="margin-bottom: 0.5rem;">⭐ Best Events</h3>
+            <p>Curated selection of amazing events</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
