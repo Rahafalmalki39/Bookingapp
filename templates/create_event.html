@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Create Event - BookIt{% endblock %}
+
+{% block content %}
+<div style="max-width: 700px; margin: 0 auto;">
+    <div class="card">
+        <h1 style="color: #667eea; margin-bottom: 1.5rem;">Create New Event</h1>
+        
+        <form method="POST" action="{{ url_for('create_event') }}">
+            <div style="margin-bottom: 1.5rem;">
+                <label for="name" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Event Name *</label>
+                <input 
+                    type="text" 
+                    id="name" 
+                    name="name" 
+                    required 
+                    style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;"
+                    placeholder="e.g., Summer Music Festival 2025"
+                >
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label for="description" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Description *</label>
+                <textarea 
+                    id="description" 
+                    name="description" 
+                    required 
+                    rows="4"
+                    style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; resize: vertical;"
+                    placeholder="Provide a detailed description of the event..."
+                ></textarea>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <label for="date" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Date *</label>
+                    <input 
+                        type="date" 
+                        id="date" 
+                        name="date" 
+                        required 
+                        style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;"
+                    >
+                </div>
+                
+                <div>
+                    <label for="time" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Time *</label>
+                    <input 
+                        type="time" 
+                        id="time" 
+                        name="time" 
+                        required 
+                        style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;"
+                    >
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label for="venue" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Venue *</label>
+                <input 
+                    type="text" 
+                    id="venue" 
+                    name="venue" 
+                    required 
+                    style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;"
+                    placeholder="e.g., Doha Arena, Qatar National Convention Centre"
+                >
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label for="category" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Category *</label>
+                <select 
+                    id="category" 
+                    name="category" 
+                    required 
+                    style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;"
+                >
+                    <option value="">-- Select Category --</option>
+                    <option value="Concert">Concert</option>
+                    <option value="Conference">Conference</option>
+                    <option value="Workshop">Workshop</option>
+                    <option value="Sports">Sports</option>
+                    <option value="Theatre">Theatre</option>
+                    <option value="Festival">Festival</option>
+                    <option value="Exhibition">Exhibition</option>
+                    <option value="Comedy">Comedy</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <label for="price" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Price per Ticket ($) *</label>
+                    <input 
+                        type="number" 
+                        id="price" 
+                        name="price" 
+                        required 
+                        min="0" 
+                        step="0.01"
+                        style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;"
+                        placeholder="0.00"
+                    >
+                </div>
+                
+                <div>
+                    <label for="total_seats" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Total Seats *</label>
+                    <input 
+                        type="number" 
+                        id="total_seats" 
+                        name="total_seats" 
+                        required 
+                        min="1"
+                        style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;"
+                        placeholder="e.g., 500"
+                    >
+                </div>
+            </div>
+            
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                <p style="color: #666; font-size: 0.95rem; line-height: 1.6;">
+                    <strong>Note:</strong> All fields marked with * are required. Make sure to provide accurate information as this will be visible to customers.
+                </p>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary" style="text-align: center; padding: 1rem;">
+                    Cancel
+                </a>
+                <button type="submit" class="btn" style="padding: 1rem; font-size: 1.1rem;">
+                    Create Event
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

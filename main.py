@@ -10,7 +10,7 @@ app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
 
 # Initialize Firestore client
-db = firestore.Client()
+db = firestore.Client(database='bookit-db')
 
 # Collections
 USERS_COLLECTION = 'users'
