@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash
 from google.cloud import firestore
+from google.cloud.sql.connector import Connector
+import sqlalchemy
 import bcrypt
 import os
 from datetime import datetime, timedelta
@@ -9,13 +11,30 @@ import secrets
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
 
-# Initialize Firestore client
+# Initialize Firestore client (NoSQL - for users, events)
 db = firestore.Client(database='bookit-db')
 
 # Collections
 USERS_COLLECTION = 'users'
 EVENTS_COLLECTION = 'events'
-BOOKINGS_COLLECTION = 'bookings'
+
+# Initialize Cloud SQL connection pool (SQL - for bookings, transactions)
+connector = Connector()
+
+def getconn():
+    conn = connector.connect(
+        "decisive-post-480518-t8:europe-west2:bookit-db-instance",
+        "pg8000",
+        user="postgres",
+        password="BookitDB2025!",
+        db="bookit_bookings"
+    )
+    return conn
+
+db_pool = sqlalchemy.create_engine(
+    "postgresql+pg8000://",
+    creator=getconn,
+)
 
 # Helper Functions
 def hash_password(password):
@@ -78,7 +97,7 @@ def register():
         email = request.form.get('email')
         password = request.form.get('password')
         name = request.form.get('name')
-        role = request.form.get('role', 'customer')  # default to customer
+        role = request.form.get('role', 'customer')
         
         # Check if user already exists
         users_ref = db.collection(USERS_COLLECTION)
@@ -174,7 +193,7 @@ def event_detail(event_id):
 @app.route('/book/<event_id>', methods=['POST'])
 @login_required
 def book_event(event_id):
-    """Book an event"""
+    """Book an event - Now using Cloud SQL for bookings"""
     event_ref = db.collection(EVENTS_COLLECTION).document(event_id)
     event_doc = event_ref.get()
     
@@ -189,21 +208,42 @@ def book_event(event_id):
         flash('Not enough seats available', 'error')
         return redirect(url_for('event_detail', event_id=event_id))
     
-    # Create booking
-    booking_data = {
-        'user_id': session['user_id'],
-        'event_id': event_id,
-        'event_name': event_data['name'],
-        'tickets': tickets_requested,
-        'total_price': event_data['price'] * tickets_requested,
-        'booking_date': datetime.now(),
-        'status': 'confirmed'
-    }
+    # Insert booking into Cloud SQL (PostgreSQL)
+    insert_booking = sqlalchemy.text("""
+        INSERT INTO bookings (user_id, event_id, event_name, tickets, total_price, status)
+        VALUES (:user_id, :event_id, :event_name, :tickets, :total_price, :status)
+        RETURNING id
+    """)
     
-    bookings_ref = db.collection(BOOKINGS_COLLECTION)
-    bookings_ref.add(booking_data)
+    total_price = event_data['price'] * tickets_requested
     
-    # Update available seats
+    with db_pool.connect() as conn:
+        result = conn.execute(insert_booking, {
+            'user_id': session['user_id'],
+            'event_id': event_id,
+            'event_name': event_data['name'],
+            'tickets': tickets_requested,
+            'total_price': total_price,
+            'status': 'confirmed'
+        })
+        booking_id = result.fetchone()[0]
+        
+        # Insert transaction record
+        insert_transaction = sqlalchemy.text("""
+            INSERT INTO transactions (booking_id, amount, payment_method, status)
+            VALUES (:booking_id, :amount, :payment_method, :status)
+        """)
+        
+        conn.execute(insert_transaction, {
+            'booking_id': booking_id,
+            'amount': total_price,
+            'payment_method': 'card',
+            'status': 'completed'
+        })
+        
+        conn.commit()
+    
+    # Update available seats in Firestore
     new_seats = event_data['available_seats'] - tickets_requested
     event_ref.update({'available_seats': new_seats})
     
@@ -213,25 +253,43 @@ def book_event(event_id):
 @app.route('/my-bookings')
 @login_required
 def my_bookings():
-    """Display user's bookings"""
-    bookings_ref = db.collection(BOOKINGS_COLLECTION)
-    bookings = bookings_ref.where('user_id', '==', session['user_id']).stream()
+    """Display user's bookings from Cloud SQL"""
+    select_bookings = sqlalchemy.text("""
+        SELECT id, event_id, event_name, tickets, total_price, booking_date, status
+        FROM bookings
+        WHERE user_id = :user_id
+        ORDER BY booking_date DESC
+    """)
     
     bookings_list = []
-    for doc in bookings:
-        booking_data = doc.to_dict()
-        booking_data['id'] = doc.id
-        bookings_list.append(booking_data)
+    with db_pool.connect() as conn:
+        result = conn.execute(select_bookings, {'user_id': session['user_id']})
+        for row in result:
+            bookings_list.append({
+                'id': str(row[0]),
+                'event_id': row[1],
+                'event_name': row[2],
+                'tickets': row[3],
+                'total_price': float(row[4]),
+                'booking_date': row[5],
+                'status': row[6]
+            })
     
     return render_template('my_bookings.html', bookings=bookings_list)
 
 @app.route('/admin/dashboard')
 @admin_required
 def admin_dashboard():
-    """Admin dashboard"""
+    """Admin dashboard with statistics from both databases"""
+    # Events from Firestore
     events_count = len(list(db.collection(EVENTS_COLLECTION).stream()))
-    bookings_count = len(list(db.collection(BOOKINGS_COLLECTION).stream()))
     users_count = len(list(db.collection(USERS_COLLECTION).stream()))
+    
+    # Bookings from Cloud SQL
+    count_bookings = sqlalchemy.text("SELECT COUNT(*) FROM bookings")
+    with db_pool.connect() as conn:
+        result = conn.execute(count_bookings)
+        bookings_count = result.fetchone()[0]
     
     return render_template('admin_dashboard.html', 
                          events_count=events_count,
@@ -253,6 +311,7 @@ def create_event():
             'total_seats': int(request.form.get('total_seats')),
             'available_seats': int(request.form.get('total_seats')),
             'category': request.form.get('category'),
+            'image_url': request.form.get('image_url', ''),
             'created_at': datetime.now(),
             'created_by': session['user_id']
         }
