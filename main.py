@@ -520,6 +520,10 @@ What would you like to know more about?"""
         'success': True,
         'message': response_text
     })
+@app.route('/api/docs')
+def api_docs():
+    """API Documentation page"""
+    return render_template('api_docs.html')
         
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True)
