@@ -252,7 +252,31 @@ def book_event(event_id):
     new_seats = event_data['available_seats'] - tickets_requested
     event_ref.update({'available_seats': new_seats})
     
-    flash(f'Successfully booked {tickets_requested} ticket(s)!', 'success')
+# Call Cloud Function to send booking confirmation
+    try:
+        import requests
+        cloud_function_url = 'https://booking-confirmation-msefsopqja-nw.a.run.app'
+        
+        confirmation_data = {
+            'booking_id': str(booking_id),
+            'user_email': session.get('user_email'),
+            'event_name': event_data['name'],
+            'tickets': tickets_requested,
+            'total_price': float(total_price)
+        }
+        
+        # Call Cloud Function asynchronously (non-blocking)
+        response = requests.post(cloud_function_url, json=confirmation_data, timeout=5)
+        
+        if response.status_code == 200:
+            print(f"Confirmation email sent via Cloud Function for booking {booking_id}")
+        else:
+            print(f"Cloud Function call failed: {response.status_code}")
+    except Exception as e:
+        print(f"Error calling Cloud Function: {e}")
+        # Don't fail the booking if email fails
+    
+    flash(f'Successfully booked {tickets_requested} ticket(s)! Confirmation email sent.', 'success')
     return redirect(url_for('my_bookings'))
 
 @app.route('/my-bookings')
