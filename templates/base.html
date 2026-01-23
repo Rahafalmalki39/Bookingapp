@@ -133,6 +133,7 @@
                 <li><a href="{{ url_for('index') }}">Home</a></li>
                 <li><a href="{{ url_for('events') }}">Events</a></li>
                 <li><a href="{{ url_for('chat_page') }}">AI Chat</a></li>
+                <li><a href="{{ url_for('api_docs') }}">API Docs 📖</a></li>
                 {% if session.get('user_id') %}
                     <li><a href="{{ url_for('my_bookings') }}">My Bookings</a></li>
                     {% if session.get('user_role') == 'admin' %}

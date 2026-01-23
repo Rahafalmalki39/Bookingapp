@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% block title %}API Documentation - BookIt{% endblock %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 0 auto;">
+    <div class="card">
+        <h1 style="color: #667eea; margin-bottom: 0.5rem;">📚 BookIt REST API Documentation</h1>
+        <p style="color: #666; font-size: 1.1rem; margin-bottom: 2rem;">
+            RESTful API endpoints for programmatic access to BookIt platform
+        </p>
+        
+        <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+            <h3 style="color: #667eea; margin-bottom: 1rem;">Base URL</h3>
+            <code style="background: white; padding: 0.5rem 1rem; border-radius: 4px; display: inline-block; font-size: 1rem;">
+                https://your-app-url.com/api
+            </code>
+            <p style="margin-top: 1rem; color: #666;">
+                All API responses are in JSON format. Authentication is required for certain endpoints.
+            </p>
+        </div>
+    </div>
+
+    <!-- Get All Events -->
+    <div class="card">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+            <span style="background: #28a745; color: white; padding: 0.5rem 1rem; border-radius: 4px; font-weight: bold; font-size: 0.9rem;">GET</span>
+            <code style="font-size: 1.1rem; color: #333;">/api/events</code>
+        </div>
+        
+        <p style="color: #666; margin-bottom: 1rem; font-size: 1.05rem;">
+            Retrieve a list of all available events.
+        </p>
+        
+        <h4 style="color: #667eea; margin-bottom: 0.5rem;">Response Example:</h4>
+        <pre style="background: #282c34; color: #abb2bf; padding: 1.5rem; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; line-height: 1.5;"><code>{
+  "success": true,
+  "count": 2,
+  "events": [
+    {
+      "id": "abc123",
+      "name": "Tech Summit 2025",
+      "description": "Annual technology conference",
+      "date": "2025-03-15",
+      "time": "10:00",
+      "venue": "Qatar Convention Centre",
+      "price": 75.00,
+      "category": "Conference",
+      "total_seats": 200,
+      "available_seats": 150,
+      "image_url": "https://example.com/image.jpg",
+      "created_at": "2025-01-20T12:00:00"
+    }
+  ]
+}</code></pre>
+
+        <div style="margin-top: 1rem;">
+            <a href="/api/events" target="_blank" class="btn" style="display: inline-block;">
+                Try it → /api/events
+            </a>
+        </div>
+    </div>
+
+    <!-- Get Single Event -->
+    <div class="card">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+            <span style="background: #28a745; color: white; padding: 0.5rem 1rem; border-radius: 4px; font-weight: bold; font-size: 0.9rem;">GET</span>
+            <code style="font-size: 1.1rem; color: #333;">/api/events/{event_id}</code>
+        </div>
+        
+        <p style="color: #666; margin-bottom: 1rem; font-size: 1.05rem;">
+            Retrieve details of a specific event by ID.
+        </p>
+        
+        <h4 style="color: #667eea; margin-bottom: 0.5rem;">Parameters:</h4>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 1rem;">
+            <tr style="background: #f8f9fa;">
+                <th style="padding: 0.75rem; text-align: left; border: 1px solid #ddd;">Parameter</th>
+                <th style="padding: 0.75rem; text-align: left; border: 1px solid #ddd;">Type</th>
+                <th style="padding: 0.75rem; text-align: left; border: 1px solid #ddd;">Description</th>
+            </tr>
+            <tr>
+                <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>event_id</code></td>
+                <td style="padding: 0.75rem; border: 1px solid #ddd;">String</td>
+                <td style="padding: 0.75rem; border: 1px solid #ddd;">Unique identifier of the event</td>
+            </tr>
+        </table>
+        
+        <h4 style="color: #667eea; margin-bottom: 0.5rem;">Response Example:</h4>
+        <pre style="background: #282c34; color: #abb2bf; padding: 1.5rem; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; line-height: 1.5;"><code>{
+  "success": true,
+  "event": {
+    "id": "abc123",
+    "name": "Tech Summit 2025",
+    "description": "Annual technology conference featuring industry leaders",
+    "date": "2025-03-15",
+    "time": "10:00",
+    "venue": "Qatar Convention Centre",
+    "price": 75.00,
+    "category": "Conference",
+    "total_seats": 200,
+    "available_seats": 150
+  }
+}</code></pre>
+
+        <h4 style="color: #dc3545; margin-bottom: 0.5rem; margin-top: 1rem;">Error Response (404):</h4>
+        <pre style="background: #282c34; color: #abb2bf; padding: 1.5rem; border-radius: 8px; overflow-x: auto; font-size: 0.9rem;"><code>{
+  "success": false,
+  "error": "Event not found"
+}</code></pre>
+    </div>
+
+    <!-- Get All Bookings -->
+    <div class="card">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+            <span style="background: #28a745; color: white; padding: 0.5rem 1rem; border-radius: 4px; font-weight: bold; font-size: 0.9rem;">GET</span>
+            <code style="font-size: 1.1rem; color: #333;">/api/bookings</code>
+        </div>
+        
+        <p style="color: #666; margin-bottom: 1rem; font-size: 1.05rem;">
+            Retrieve all bookings from the Cloud SQL database.
+        </p>
+        
+        <h4 style="color: #667eea; margin-bottom: 0.5rem;">Response Example:</h4>
+        <pre style="background: #282c34; color: #abb2bf; padding: 1.5rem; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; line-height: 1.5;"><code>{
+  "success": true,
+  "count": 5,
+  "bookings": [
+    {
+      "id": 1,
+      "user_id": "user123",
+      "event_id": "abc123",
+      "event_name": "Tech Summit 2025",
+      "tickets": 2,
+      "total_price": 150.00,
+      "booking_date": "2025-01-20T14:30:00",
+      "status": "confirmed",
+      "transaction_amount": 150.00,
+      "payment_method": "card"
+    }
+  ]
+}</code></pre>
+
+        <div style="margin-top: 1rem;">
+            <a href="/api/bookings" target="_blank" class="btn" style="display: inline-block;">
+                Try it → /api/bookings
+            </a>
+        </div>
+    </div>
+
+    <!-- Get Statistics -->
+    <div class="card">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+            <span style="background: #28a745; color: white; padding: 0.5rem 1rem; border-radius: 4px; font-weight: bold; font-size: 0.9rem;">GET</span>
+            <code style="font-size: 1.1rem; color: #333;">/api/stats</code>
+        </div>
+        
+        <p style="color: #666; margin-bottom: 1rem; font-size: 1.05rem;">
+            Retrieve platform statistics and analytics.
+        </p>
+        
+        <h4 style="color: #667eea; margin-bottom: 0.5rem;">Response Example:</h4>
+        <pre style="background: #282c34; color: #abb2bf; padding: 1.5rem; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; line-height: 1.5;"><code>{
+  "success": true,
+  "statistics": {
+    "total_events": 10,
+    "total_users": 25,
+    "total_bookings": 50,
+    "total_revenue": 3750.00,
+    "total_tickets_sold": 100
+  }
+}</code></pre>
+
+        <div style="margin-top: 1rem;">
+            <a href="/api/stats" target="_blank" class="btn" style="display: inline-block;">
+                Try it → /api/stats
+            </a>
+        </div>
+    </div>
+
+    <!-- Chat API -->
+    <div class="card">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+            <span style="background: #007bff; color: white; padding: 0.5rem 1rem; border-radius: 4px; font-weight: bold; font-size: 0.9rem;">POST</span>
+            <code style="font-size: 1.1rem; color: #333;">/api/chat</code>
+        </div>
+        
+        <p style="color: #666; margin-bottom: 1rem; font-size: 1.05rem;">
+            Send a message to the AI customer support chatbot.
+        </p>
+        
+        <h4 style="color: #667eea; margin-bottom: 0.5rem;">Request Body:</h4>
+        <pre style="background: #282c34; color: #abb2bf; padding: 1.5rem; border-radius: 8px; overflow-x: auto; font-size: 0.9rem;"><code>{
+  "message": "How do I book an event?"
+}</code></pre>
+        
+        <h4 style="color: #667eea; margin-bottom: 0.5rem; margin-top: 1rem;">Response Example:</h4>
+        <pre style="background: #282c34; color: #abb2bf; padding: 1.5rem; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; line-height: 1.5;"><code>{
+  "success": true,
+  "message": "To book an event: 1. Browse events on our Events page..."
+}</code></pre>
+
+        <h4 style="color: #dc3545; margin-bottom: 0.5rem; margin-top: 1rem;">Error Response (400):</h4>
+        <pre style="background: #282c34; color: #abb2bf; padding: 1.5rem; border-radius: 8px; overflow-x: auto; font-size: 0.9rem;"><code>{
+  "success": false,
+  "error": "No message provided"
+}</code></pre>
+    </div>
+
+    <!-- HTTP Status Codes -->
+    <div class="card">
+        <h2 style="color: #667eea; margin-bottom: 1rem;">HTTP Status Codes</h2>
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr style="background: #f8f9fa;">
+                <th style="padding: 0.75rem; text-align: left; border: 1px solid #ddd;">Code</th>
+                <th style="padding: 0.75rem; text-align: left; border: 1px solid #ddd;">Meaning</th>
+                <th style="padding: 0.75rem; text-align: left; border: 1px solid #ddd;">Description</th>
+            </tr>
+            <tr>
+                <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>200</code></td>
+                <td style="padding: 0.75rem; border: 1px solid #ddd;">OK</td>
+                <td style="padding: 0.75rem; border: 1px solid #ddd;">Request successful</td>
+            </tr>
+            <tr style="background: #f8f9fa;">
+                <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>400</code></td>
+                <td style="padding: 0.75rem; border: 1px solid #ddd;">Bad Request</td>
+                <td style="padding: 0.75rem; border: 1px solid #ddd;">Invalid request parameters</td>
+            </tr>
+            <tr>
+                <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>404</code></td>
+                <td style="padding: 0.75rem; border: 1px solid #ddd;">Not Found</td>
+                <td style="padding: 0.75rem; border: 1px solid #ddd;">Resource not found</td>
+            </tr>
+            <tr style="background: #f8f9fa;">
+                <td style="padding: 0.75rem; border: 1px solid #ddd;"><code>500</code></td>
+                <td style="padding: 0.75rem; border: 1px solid #ddd;">Server Error</td>
+                <td style="padding: 0.75rem; border: 1px solid #ddd;">Internal server error</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Usage Example -->
+    <div class="card" style="background: #f8f9fa;">
+        <h2 style="color: #667eea; margin-bottom: 1rem;">💡 Usage Example (JavaScript)</h2>
+        <pre style="background: #282c34; color: #abb2bf; padding: 1.5rem; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; line-height: 1.5;"><code>// Fetch all events
+fetch('/api/events')
+  .then(response => response.json())
+  .then(data => {
+    console.log('Events:', data.events);
+  });
+
+// Send chat message
+fetch('/api/chat', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    message: 'How do I book tickets?'
+  })
+})
+  .then(response => response.json())
+  .then(data => {
+    console.log('Bot response:', data.message);
+  });</code></pre>
+    </div>
+</div>
+{% endblock %}
