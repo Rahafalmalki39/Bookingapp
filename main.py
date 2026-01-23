@@ -8,6 +8,70 @@ from datetime import datetime, timedelta
 import secrets
 import google.generativeai as genai
 from config import GEMINI_API_KEY
+from functools import wraps
+import re
+from datetime import datetime, timedelta
+
+# Security: Email validation regex
+EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+
+# Security: Input sanitization
+def sanitize_input(text, max_length=500):
+    """Sanitize user input to prevent XSS and injection attacks"""
+    if not text:
+        return ""
+    # Remove any HTML tags
+    text = re.sub(r'<[^>]*>', '', str(text))
+    # Limit length
+    text = text[:max_length]
+    # Remove potentially dangerous characters
+    text = text.strip()
+    return text
+
+def validate_email(email):
+    """Validate email format"""
+    if not email or not EMAIL_REGEX.match(email):
+        return False
+    return True
+
+# Security: Rate limiting (simple in-memory implementation)
+request_counts = {}
+
+def rate_limit(max_requests=10, time_window=60):
+    """Rate limiting decorator - max_requests per time_window seconds"""
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            # Get client IP
+            client_ip = request.remote_addr
+            current_time = datetime.now()
+            
+            # Clean old entries
+            expired_keys = [
+                ip for ip, (count, timestamp) in request_counts.items()
+                if (current_time - timestamp).seconds > time_window
+            ]
+            for ip in expired_keys:
+                del request_counts[ip]
+            
+            # Check rate limit
+            if client_ip in request_counts:
+                count, first_request = request_counts[client_ip]
+                if (current_time - first_request).seconds < time_window:
+                    if count >= max_requests:
+                        return jsonify({
+                            'success': False,
+                            'error': 'Rate limit exceeded. Please try again later.'
+                        }), 429
+                    request_counts[client_ip] = (count + 1, first_request)
+                else:
+                    request_counts[client_ip] = (1, current_time)
+            else:
+                request_counts[client_ip] = (1, current_time)
+            
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
 
 # Configure Gemini AI
 genai.configure(api_key=GEMINI_API_KEY)
@@ -99,10 +163,19 @@ def index():
 def register():
     """User registration"""
     if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
-        name = request.form.get('name')
+        email = sanitize_input(request.form.get('email'), 100)
+        password = request.form.get('password')  
+        name = sanitize_input(request.form.get('name'), 100)
         role = request.form.get('role', 'customer')
+        # Validate email format
+        if not validate_email(email):
+            flash('Invalid email format', 'error')
+            return render_template('register.html')
+
+# Validate password strength
+        if len(password) < 6:
+            flash('Password must be at least 6 characters long', 'error')
+            return render_template('register.html')
         
         # Check if user already exists
         users_ref = db.collection(USERS_COLLECTION)
@@ -474,6 +547,7 @@ def chat_page():
     """Chatbot page"""
     return render_template('chat.html')
 @app.route('/api/chat', methods=['POST'])
+@rate_limit(max_requests=20, time_window=60)  # Max 20 requests per minute
 def api_chat():
     """Rule-based Chatbot for BookIt"""
     user_message = request.json.get('message', '').lower()
@@ -548,6 +622,16 @@ What would you like to know more about?"""
 def api_docs():
     """API Documentation page"""
     return render_template('api_docs.html')
-        
+# Security: Add security headers to all responses
+@app.after_request
+def add_security_headers(response):
+    """Add security headers to all HTTP responses"""
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    response.headers['Content-Security-Policy'] = "default-src 'self' 'unsafe-inline' 'unsafe-eval' https:; img-src 'self' https: data:;"
+    return response
+            
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True)
