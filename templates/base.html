@@ -354,9 +354,37 @@
         {% block content %}{% endblock %}
     </div>
 
-    <footer>
-        <p>&copy; 2026 BookIt - Modern Event Booking Platform | Built with Flask & Google Cloud</p>
-        <p style="margin-top: 0.5rem; font-size: 0.85rem; color: #999;">Systems Development Coursework Project</p>
+<footer>
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-bottom: 2rem; text-align: left;">
+                <div>
+                    <h4 style="color: #667eea; margin-bottom: 1rem; font-weight: 600;">Quick Links</h4>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <a href="{{ url_for('index') }}" style="color: #666; text-decoration: none;">Home</a>
+                        <a href="{{ url_for('events') }}" style="color: #666; text-decoration: none;">Browse Events</a>
+                        <a href="{{ url_for('api_docs') }}" style="color: #666; text-decoration: none;">API Documentation</a>
+                    </div>
+                </div>
+                <div>
+                    <h4 style="color: #667eea; margin-bottom: 1rem; font-weight: 600;">Support</h4>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <a href="{{ url_for('chat_page') }}" style="color: #666; text-decoration: none;">AI Chat Support</a>
+                        <a href="https://github.com/Rahafalmalki39/Bookingapp" style="color: #666; text-decoration: none;" target="_blank">GitHub Repository</a>
+                    </div>
+                </div>
+                <div>
+                    <h4 style="color: #667eea; margin-bottom: 1rem; font-weight: 600;">Technology</h4>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <span style="color: #666;">Flask • Python</span>
+                        <span style="color: #666;">Google Cloud Platform</span>
+                        <span style="color: #666;">Firestore • Cloud SQL</span>
+                    </div>
+                </div>
+            </div>
+            <hr style="border: none; border-top: 1px solid rgba(102, 126, 234, 0.2); margin: 2rem 0;">
+            <p style="text-align: center;">&copy; 2026 BookIt - Modern Event Booking Platform | Built with Flask & Google Cloud</p>
+            <p style="margin-top: 0.5rem; font-size: 0.85rem; color: #999; text-align: center;">Systems Development Coursework Project by Rahaf Almalki </p>
+        </div>
     </footer>
 </body>
 </html>
