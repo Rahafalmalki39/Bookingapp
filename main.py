@@ -73,9 +73,15 @@ def rate_limit(max_requests=10, time_window=60):
 
 
 # Initialize Flask app
+# Initialize Flask app
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
 
+# Configure session to last longer (7 days)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
+app.config['SESSION_COOKIE_SECURE'] = True  # HTTPS only
+app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent JavaScript access
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # CSRF protection
 # Initialize Firestore client (NoSQL - for users, events)
 db = firestore.Client(database='bookit-db')
 
@@ -223,7 +229,7 @@ def login():
             session['user_id'] = user_doc.id
             session['user_email'] = user_data['email']
             session['user_role'] = user_data['role']
-            flash('Login successful!', 'success')
+            session.permanent = True  # Make session last longer
             return redirect(url_for('index'))
         else:
             flash('Invalid credentials', 'error')
