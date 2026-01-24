@@ -6,8 +6,6 @@ import bcrypt
 import os
 from datetime import datetime, timedelta
 import secrets
-import google.generativeai as genai
-from config import GEMINI_API_KEY
 from functools import wraps
 import re
 from datetime import datetime, timedelta
@@ -73,8 +71,6 @@ def rate_limit(max_requests=10, time_window=60):
         return decorated_function
     return decorator
 
-# Configure Gemini AI
-genai.configure(api_key=GEMINI_API_KEY)
 
 # Initialize Flask app
 app = Flask(__name__)
