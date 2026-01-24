@@ -156,6 +156,23 @@
             position: relative;
             overflow: hidden;
         }
+        /* Loading Button State */
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* Smooth Scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Selection Color */
+        ::selection {
+            background: #667eea;
+            color: white;
+        }
         
         .btn:before {
             content: '';
@@ -332,7 +349,7 @@
                 {% else %}
                     <li><a href="{{ url_for('chat_page') }}">AI Chat 🤖</a></li>
                     <li><a href="{{ url_for('api_docs') }}">API Docs 📖</a></li>
-                    <li><a href="{{ url_for('login') }}" class="btn" style="padding: 0.5rem 1.25rem;">Login</a></li>
+                    <li><a href="{{ url_for('login') }}" class="btn" style="padding: 0.5rem 1.25rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">Login</a></li>
                 {% endif %}
             </ul>
         </div>
