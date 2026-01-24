@@ -3,94 +3,145 @@
 {% block title %}Home - BookIt{% endblock %}
 
 {% block content %}
-<div class="card">
-    <h1 style="color: #667eea; margin-bottom: 1rem;">Welcome to BookIt Event Booking System</h1>
+<!-- Hero Section -->
+<div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center; padding: 4rem 2rem; margin-bottom: 3rem;">
+    <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 1rem; text-shadow: 2px 2px 10px rgba(0,0,0,0.2);">
+        Welcome to BookIt 🎉
+    </h1>
     
     {% if user %}
-        <p style="font-size: 1.1rem; margin-bottom: 2rem;">
-            Hello, <strong>{{ user.name }}</strong>! Browse our exciting events below.
+        <p style="font-size: 1.3rem; margin-bottom: 2rem; opacity: 0.95;">
+            Hello, <strong>{{ user.name }}</strong>! Discover amazing events below.
         </p>
     {% else %}
-        <p style="font-size: 1.1rem; margin-bottom: 2rem;">
-            Discover and book amazing events. <a href="{{ url_for('register') }}" style="color: #667eea;">Register now</a> to get started!
+        <p style="font-size: 1.3rem; margin-bottom: 2rem; opacity: 0.95;">
+            Your Gateway to Unforgettable Experiences
         </p>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="{{ url_for('register') }}" class="btn" style="background: white; color: #667eea; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                Get Started Free
+            </a>
+            <a href="{{ url_for('events') }}" class="btn" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px);">
+                Browse Events
+            </a>
+        </div>
     {% endif %}
 </div>
 
-<h2 style="color: white; margin-bottom: 1.5rem;">Upcoming Events</h2>
+<!-- Stats Section -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
+    <div class="card" style="text-align: center; background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);">
+        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🎫</div>
+        <h3 style="font-size: 2rem; color: #667eea; margin-bottom: 0.25rem;">Easy Booking</h3>
+        <p style="color: #666;">Book tickets in seconds</p>
+    </div>
+    <div class="card" style="text-align: center; background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);">
+        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🔒</div>
+        <h3 style="font-size: 2rem; color: #667eea; margin-bottom: 0.25rem;">100% Secure</h3>
+        <p style="color: #666;">Your data is protected</p>
+    </div>
+    <div class="card" style="text-align: center; background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);">
+        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">⚡</div>
+        <h3 style="font-size: 2rem; color: #667eea; margin-bottom: 0.25rem;">Instant Confirm</h3>
+        <p style="color: #666;">Get tickets immediately</p>
+    </div>
+</div>
+
+<h2 style="color: white; margin-bottom: 2rem; font-size: 2rem; font-weight: 700; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);">
+    🔥 Upcoming Events
+</h2>
 
 {% if events %}
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 2rem;">
         {% for event in events %}
-        <div class="card" style="padding: 0; overflow: hidden;">
+        <div class="card" style="padding: 0; overflow: hidden; cursor: pointer;" onclick="window.location='{{ url_for('event_detail', event_id=event.id) }}'">
             <!-- Event Image -->
-            <div style="width: 100%; height: 200px; overflow: hidden; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div style="width: 100%; height: 220px; overflow: hidden; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); position: relative;">
                 {% if event.image_url %}
                     <img src="{{ event.image_url }}" alt="{{ event.name }}" 
-                         style="width: 100%; height: 100%; object-fit: cover;">
+                         style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;">
                 {% else %}
-                    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 4rem;">
+                    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 5rem;">
                         🎉
                     </div>
                 {% endif %}
+                <div class="badge" style="position: absolute; top: 1rem; right: 1rem;">{{ event.category }}</div>
             </div>
             
             <!-- Event Details -->
-            <div style="padding: 1.5rem;">
-                <h3 style="color: #667eea; margin-bottom: 0.5rem;">{{ event.name }}</h3>
-                <p style="color: #666; margin-bottom: 0.5rem;">
-                    <strong>Category:</strong> {{ event.category }}
-                </p>
-                <p style="color: #666; margin-bottom: 0.5rem;">
-                    <strong>Date:</strong> {{ event.date }} at {{ event.time }}
-                </p>
-                <p style="color: #666; margin-bottom: 0.5rem;">
-                    <strong>Venue:</strong> {{ event.venue }}
-                </p>
-                <p style="color: #666; margin-bottom: 0.5rem;">
-                    <strong>Price:</strong> ${{ event.price }}
-                </p>
-                <p style="color: #666; margin-bottom: 1rem;">
-                    <strong>Available Seats:</strong> {{ event.available_seats }} / {{ event.total_seats }}
-                </p>
-                <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn" style="width: 100%; text-align: center;">
-                    View Details
+            <div style="padding: 1.75rem;">
+                <h3 style="color: #333; margin-bottom: 1rem; font-size: 1.4rem; font-weight: 700;">
+                    {{ event.name }}
+                </h3>
+                
+                <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; color: #666;">
+                        <span style="font-size: 1.1rem;">📅</span>
+                        <span>{{ event.date }} • {{ event.time }}</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; color: #666;">
+                        <span style="font-size: 1.1rem;">📍</span>
+                        <span>{{ event.venue }}</span>
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="font-size: 1.75rem; font-weight: 700; color: #667eea;">
+                            ${{ event.price }}
+                        </div>
+                        <div style="color: {% if event.available_seats < 20 %}#dc3545{% else %}#28a745{% endif %}; font-weight: 600;">
+                            {% if event.available_seats > 0 %}
+                                {{ event.available_seats }} left
+                            {% else %}
+                                Sold Out
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn" style="width: 100%; text-align: center; display: block; text-decoration: none;">
+                    View Details →
                 </a>
             </div>
         </div>
         {% endfor %}
     </div>
 {% else %}
-    <div class="card">
-        <p style="text-align: center; font-size: 1.1rem; color: #666;">
-            No events available at the moment. Check back soon!
+    <div class="card" style="text-align: center; padding: 4rem 2rem;">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">🎪</div>
+        <h2 style="color: #667eea; margin-bottom: 1rem;">No Events Yet</h2>
+        <p style="color: #666; font-size: 1.1rem; margin-bottom: 2rem;">
+            Be the first to create an amazing event!
         </p>
         {% if session.get('user_role') == 'admin' %}
-            <p style="text-align: center; margin-top: 1rem;">
-                <a href="{{ url_for('create_event') }}" class="btn">Create First Event</a>
-            </p>
+            <a href="{{ url_for('create_event') }}" class="btn">Create First Event</a>
         {% endif %}
     </div>
 {% endif %}
 
-<div class="card" style="margin-top: 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-    <h2 style="margin-bottom: 1rem;">Why Choose BookIt?</h2>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
-        <div>
-            <h3 style="margin-bottom: 0.5rem;">🎫 Easy Booking</h3>
-            <p>Book your tickets in just a few clicks</p>
+<!-- Features Section -->
+<div class="card" style="margin-top: 3rem; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); border: 2px solid rgba(102, 126, 234, 0.2);">
+    <h2 style="color: #667eea; margin-bottom: 2rem; font-size: 2rem; text-align: center; font-weight: 700;">
+        Why Choose BookIt?
+    </h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+        <div style="text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">⚡</div>
+            <h3 style="color: #667eea; margin-bottom: 0.75rem; font-weight: 600;">Lightning Fast</h3>
+            <p style="color: #666; line-height: 1.7;">Book your tickets in just a few clicks with our streamlined process</p>
         </div>
-        <div>
-            <h3 style="margin-bottom: 0.5rem;">🔒 Secure Payments</h3>
-            <p>Your transactions are safe and encrypted</p>
+        <div style="text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🛡️</div>
+            <h3 style="color: #667eea; margin-bottom: 0.75rem; font-weight: 600;">Bank-Level Security</h3>
+            <p style="color: #666; line-height: 1.7;">Your data is protected with enterprise-grade encryption</p>
         </div>
-        <div>
-            <h3 style="margin-bottom: 0.5rem;">📱 Digital Tickets</h3>
-            <p>Access your tickets anytime, anywhere</p>
+        <div style="text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">📱</div>
+            <h3 style="color: #667eea; margin-bottom: 0.75rem; font-weight: 600;">Digital Tickets</h3>
+            <p style="color: #666; line-height: 1.7;">Access your tickets anytime, anywhere on any device</p>
         </div>
-        <div>
-            <h3 style="margin-bottom: 0.5rem;">⭐ Best Events</h3>
-            <p>Curated selection of amazing events</p>
+        <div style="text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🎯</div>
+            <h3 style="color: #667eea; margin-bottom: 0.75rem; font-weight: 600;">Best Selection</h3>
+            <p style="color: #666; line-height: 1.7;">Curated collection of the most amazing events</p>
         </div>
     </div>
 </div>
