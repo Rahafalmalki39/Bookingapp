@@ -1,4 +1,4 @@
-runtime: python39
+runtime: python312
 
 env_variables:
   FLASK_ENV: 'production'
