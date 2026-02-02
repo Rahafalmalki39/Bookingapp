@@ -435,11 +435,6 @@ DB_CONNECTION_NAME=your-cloud-sql-connection
 - [ ] QR code ticket generation
 - [ ] Event recommendation engine
 
----
-
-## 📝 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
 
 ---
 
@@ -448,7 +443,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 **[Your Name]**
 - GitHub: [@Rahafalmalki39](https://github.com/Rahafalmalki39)
 - Project: Systems Development Coursework
-- University: [Your University]
+- University: Bournemouth University
 - Date: January 2026
 
 ---
@@ -482,6 +477,6 @@ For issues or questions:
 
 ---
 
-**Built with ❤️ using Python, Flask, and Google Cloud Platform**
+**Built using Python, Flask, and Google Cloud Platform**
 
 *Last Updated: January 2026*
